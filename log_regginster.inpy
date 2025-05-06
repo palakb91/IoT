@@ -1,0 +1,37 @@
+!pip install gspread oauth2client
+
+import gspread
+import random
+from oauth2client.service_account import ServiceAccountCredentials
+from datetime import datetime
+import time
+
+# Define the scope
+scope = [
+    "https://spreadsheets.google.com/feeds",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Load creds and authorize
+creds = ServiceAccountCredentials.from_json_keyfile_name("Iot123.json", scope)
+client = gspread.authorize(creds)
+
+# Open your spreadsheet
+spreadsheet = client.open("IoT123")
+sheet = spreadsheet.sheet1
+
+# Add headers (only once if not already there)
+headers = ["Date", "Time", "Temperature (°C)", "Humidity (%)"]
+sheet.append_row(headers)
+
+# Simulate real-time data logging
+for i in range(10):
+    date = datetime.now().strftime("%Y-%m-%d")
+    time_now = datetime.now().strftime("%H:%M:%S")
+    temperature = round(random.uniform(20.0, 35.0), 2)
+    humidity = round(random.uniform(30.0, 70.0), 2)
+    sheet.append_row([date, time_now, temperature, humidity])
+    print(f"Logged: {date} {time_now} | Temp: {temperature} | Humidity: {humidity}")
+    time.sleep(1)
+
+print("✅ Data uploaded successfully!")
